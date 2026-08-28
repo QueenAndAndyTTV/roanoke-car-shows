@@ -17,32 +17,34 @@ export default function Map({ shows }: { shows: any[] }) {
   const centerLon = shows.length > 0 && shows[0].longitude ? shows[0].longitude : -79.9414;
 
   return (
-    <MapContainer
-      center={[centerLat, centerLon]}
-      zoom={11}
-      scrollWheelZoom={false}
-      className="w-full h-[500px] rounded-lg z-0"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {shows.map((show) => {
-        if (!show.latitude || !show.longitude) return null;
-        return (
-          <Marker key={show.id} position={[show.latitude, show.longitude]} icon={defaultIcon}>
-            <Popup>
-              <div className="text-sm">
-                <strong className="font-bold">{show.title}</strong>
-                <p className="text-xs text-gray-600 mt-1">{show.address}</p>
-                <a href={`/event/${show.id}`} className="text-blue-600 text-xs font-semibold underline mt-2 block">
-                  View Details →
-                </a>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+    <div style={{ height: '500px', width: '100%', position: 'relative' }}>
+      <MapContainer
+        center={[centerLat, centerLon]}
+        zoom={11}
+        scrollWheelZoom={false}
+        style={{ height: '100%', width: '100%', borderRadius: '0.5rem', zIndex: 0 }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {shows.map((show) => {
+          if (!show.latitude || !show.longitude) return null;
+          return (
+            <Marker key={show.id} position={[show.latitude, show.longitude]} icon={defaultIcon}>
+              <Popup>
+                <div className="text-sm">
+                  <strong className="font-bold">{show.title}</strong>
+                  <p className="text-xs text-gray-600 mt-1">{show.address}</p>
+                  <a href={`/event/${show.id}`} className="text-blue-600 text-xs font-semibold underline mt-2 block">
+                    View Details →
+                  </a>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 }
