@@ -30,6 +30,8 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
   const [editDate, setEditDate] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editIsCancelled, setEditIsCancelled] = useState(false);
+  const [editCancellationReason, setEditCancellationReason] = useState('');
   const [passcode, setPasscode] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -79,6 +81,8 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
     setEditAdmission(eventData.admission || 'Free');
     setEditAddress(eventData.address);
     setEditDescription(eventData.description || '');
+    setEditIsCancelled(eventData.is_cancelled || false);
+    setEditCancellationReason(eventData.cancellation_reason || '');
 
     const d = new Date(eventData.event_date);
     const year = d.getFullYear();
@@ -144,6 +148,8 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
           repeat_until: isRecurring && repeatUntil ? repeatUntil : null,
           address: editAddress,
           description: editDescription,
+          is_cancelled: editIsCancelled,
+          cancellation_reason: editIsCancelled ? editCancellationReason : null,
           latitude: lat,
           longitude: lon,
         })
@@ -186,6 +192,8 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
             repeat_until: repeatUntil,
             address: editAddress,
             description: editDescription,
+            is_cancelled: editIsCancelled,
+            cancellation_reason: editIsCancelled ? editCancellationReason : null,
             flyer_url: show.flyer_url || '',
             latitude: lat,
             longitude: lon,
@@ -317,6 +325,18 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
                 </div>
               </div>
 
+              {/* Cancellation Banner */}
+              {show.is_cancelled && (
+                <div className="mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg shadow-sm">
+                  <p className="font-bold text-sm uppercase tracking-wide flex items-center gap-1.5">
+                    <span>⚠️</span> Event Cancelled
+                  </p>
+                  {show.cancellation_reason && (
+                    <p className="text-xs mt-1 text-red-600 font-medium">Reason: {show.cancellation_reason}</p>
+                  )}
+                </div>
+              )}
+
               {isEditing ? (
                 <form onSubmit={handleUpdate} className="mt-6 space-y-4 bg-gray-50 p-6 rounded-md border border-gray-200">
                   <h2 className="text-base font-bold text-gray-800">Edit Event Details</h2>
@@ -428,6 +448,32 @@ export default function EventDetail({ params }: { params: Promise<{ id: string }
                             className="block w-full rounded-md border border-gray-300 p-1.5 text-gray-900 text-xs bg-white"
                           />
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cancellation Settings in Admin Form */}
+                  <div className="p-4 border border-red-200 bg-red-50 rounded-md space-y-3">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editIsCancelled}
+                        onChange={(e) => setEditIsCancelled(e.target.checked)}
+                        className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                      />
+                      <span className="font-bold text-red-700 text-xs uppercase tracking-wider">Mark Event as Cancelled</span>
+                    </label>
+
+                    {editIsCancelled && (
+                      <div>
+                        <label className="block text-xs font-semibold text-red-700 mb-1">Cancellation Reason</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Cancelled due to heavy rain and storms"
+                          value={editCancellationReason}
+                          onChange={(e) => setEditCancellationReason(e.target.value)}
+                          className="w-full p-2 text-sm border border-red-300 rounded bg-white text-gray-900"
+                        />
                       </div>
                     )}
                   </div>
