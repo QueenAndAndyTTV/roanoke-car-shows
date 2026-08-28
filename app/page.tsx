@@ -148,10 +148,21 @@ export default function Home() {
                   <Link
                     key={show.id}
                     href={`/event/${show.id}`}
-                    className="block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:border-blue-500 hover:shadow-md transition"
+                    className={`block bg-white rounded-lg shadow-sm border overflow-hidden transition ${
+                      show.is_cancelled ? 'border-red-300 bg-red-50/30' : 'border-gray-200 hover:border-blue-500 hover:shadow-md'
+                    }`}
                   >
                     {show.flyer_url && (
-                      <img src={show.flyer_url} alt="Show Flyer" className="w-full h-48 object-cover" />
+                      <div className="relative">
+                        <img src={show.flyer_url} alt="Show Flyer" className="w-full h-48 object-cover" />
+                        {show.is_cancelled && (
+                          <div className="absolute inset-0 bg-red-900/40 backdrop-blur-[2px] flex items-center justify-center">
+                            <span className="bg-red-600 text-white font-bold text-sm px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                              Cancelled
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
@@ -172,13 +183,35 @@ export default function Home() {
                           </span>
                         )}
                       </div>
+
+                      {/* Main Page Cancellation Banner */}
+                      {show.is_cancelled && !show.flyer_url && (
+                        <div className="mb-3 p-2.5 bg-red-100 border border-red-300 text-red-700 rounded-md">
+                          <p className="font-bold text-xs uppercase tracking-wide flex items-center gap-1">
+                            <span>⚠️</span> Event Cancelled
+                          </p>
+                          {show.cancellation_reason && (
+                            <p className="text-xs mt-1 text-red-600 font-medium">Reason: {show.cancellation_reason}</p>
+                          )}
+                        </div>
+                      )}
+
                       <h2 className="text-xl font-bold text-gray-800">{show.title}</h2>
                       <p className="text-blue-600 mt-1 font-medium text-sm">
                         {new Date(show.event_date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         {repeatText && <span className="text-gray-500 font-normal ml-1.5 text-xs">{repeatText}</span>}
                       </p>
                       <p className="text-gray-600 mt-2 text-sm">{show.address}</p>
-                      {show.description && <p className="text-gray-700 mt-3 text-sm">{show.description}</p>}
+                      
+                      {show.is_cancelled && show.flyer_url && show.cancellation_reason && (
+                        <p className="text-xs text-red-600 font-medium mt-3 bg-red-50 p-2 rounded border border-red-200">
+                          Reason: {show.cancellation_reason}
+                        </p>
+                      )}
+
+                      {show.description && !show.is_cancelled && (
+                        <p className="text-gray-700 mt-3 text-sm">{show.description}</p>
+                      )}
                     </div>
                   </Link>
                 );
