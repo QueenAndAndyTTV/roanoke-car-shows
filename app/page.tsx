@@ -49,16 +49,33 @@ export default function Home() {
   }, []);
 
   const fetchShows = async () => {
+    // Fetch events from yesterday onward to account for UTC timezone differences safely
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
     const { data } = await supabase
       .from('car_shows')
       .select('*')
+      .gte('event_date', yesterday.toISOString())
       .order('event_date', { ascending: true });
+    
     if (data) setShows(data);
   };
 
   const filteredShows = shows.filter((show) => {
+    // 1. Date Check: Keep events happening today or in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Sets time to exactly midnight today
+
+    const showDate = new Date(show.event_date);
+    showDate.setHours(0, 0, 0, 0); // Sets event time to exactly midnight on its day
+
+    const isUpcoming = showDate.getTime() >= today.getTime();
+
+    // 2. Category Check
     const matchesCategory = selectedCategory === 'All' || show.category === selectedCategory;
 
+    // 3. Distance Check
     let matchesDistance = true;
     if (show.latitude && show.longitude) {
       const distance = getDistanceFromLatLonInMiles(
@@ -70,7 +87,7 @@ export default function Home() {
       matchesDistance = distance <= maxDistance;
     }
 
-    return matchesCategory && matchesDistance;
+    return isUpcoming && matchesCategory && matchesDistance;
   });
 
   const uniqueShowsMap = new Map();
@@ -132,7 +149,7 @@ export default function Home() {
           <div className="lg:col-span-1 flex flex-col gap-6">
             {displayShows.length === 0 ? (
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <p className="text-gray-600">No shows match your filter criteria.</p>
+                <p className="text-gray-600">No upcoming shows match your filter criteria.</p>
               </div>
             ) : (
               displayShows.map((show) => {
@@ -184,7 +201,6 @@ export default function Home() {
                         )}
                       </div>
 
-                      {/* Main Page Cancellation Banner */}
                       {show.is_cancelled && !show.flyer_url && (
                         <div className="mb-3 p-2.5 bg-red-100 border border-red-300 text-red-700 rounded-md">
                           <p className="font-bold text-xs uppercase tracking-wide flex items-center gap-1">
